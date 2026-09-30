@@ -1,21 +1,22 @@
 // Local dev server mirroring Vercel: static files from the project root plus
-// the /api functions with an Express-ish (status/json/query) shim.
+// every /api/*.js function with an Express-ish (status/json/query) shim.
 // Not deployed (see .vercelignore). Run: node dev.mjs
 import http from "node:http";
-import { readFile } from "node:fs/promises";
+import { readFile, readdir } from "node:fs/promises";
 import { extname, join, normalize, dirname } from "node:path";
-import { fileURLToPath } from "node:url";
-
-import fred from "./api/fred.js";
-import market from "./api/market.js";
+import { fileURLToPath, pathToFileURL } from "node:url";
 
 const root = dirname(fileURLToPath(import.meta.url));
-const handlers = { "/api/fred": fred, "/api/market": market };
+const handlers = {};
+for (const f of await readdir(join(root, "api"))) {
+  if (f.endsWith(".js")) {
+    handlers[`/api/${f.slice(0, -3)}`] = (await import(pathToFileURL(join(root, "api", f)))).default;
+  }
+}
 const MIME = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".js": "text/javascript; charset=utf-8",
-  ".mjs": "text/javascript; charset=utf-8",
   ".json": "application/json",
   ".geojson": "application/json",
   ".svg": "image/svg+xml",
@@ -34,12 +35,14 @@ http
         res.end(JSON.stringify(o));
         return res;
       };
+      const t0 = Date.now();
       try {
         await fn(req, res);
       } catch (e) {
-        console.error(e);
+        console.error(url.pathname, e);
         if (!res.writableEnded) res.status(500).json({ error: String(e) });
       }
+      console.log(`${url.pathname} ${res.statusCode} ${Date.now() - t0}ms`);
       return;
     }
     let p = url.pathname === "/" ? "/index.html" : decodeURIComponent(url.pathname);

@@ -4,183 +4,116 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Japan Pulse — Real Estate Weekly</title>
-<meta name="description" content="A weekly, data-driven read on Japanese real estate: rates, prices, the yen, inbound demand, and the listed market — every figure live from source.">
-<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='11' fill='%23bc3f26'/%3E%3C/svg%3E">
+<meta name="description" content="Live weekly dashboard on Japanese real estate: rates, prices, Tokyo offices, inbound demand and J-REITs.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Ccircle cx='16' cy='16' r='12' fill='%23e25a2c'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,600;0,9..144,700;1,9..144,500;1,9..144,600&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
 <header class="topbar">
   <div class="wrap topbar-in">
-    <a class="brand" href="#top"><span class="dot"></span>JAPAN&nbsp;PULSE<span class="brand-jp">鼓動</span></a>
+    <a class="brand" href="#top"><span class="sun"></span>JAPAN PULSE</a>
     <nav class="topnav">
-      <a href="#macro">Macro</a>
+      <a href="#rates">Rates</a>
       <a href="#prices">Prices</a>
-      <a href="#yen">Yen</a>
+      <a href="#offices">Offices</a>
       <a href="#inbound">Inbound</a>
-      <a href="#markets">Markets</a>
+      <a href="#reits">REITs</a>
     </nav>
-    <div class="top-meta">
-      <span class="stamp" id="stamp">loading…</span>
-      <button class="theme-btn" id="themeToggle" title="Toggle light / dark" aria-label="Toggle color theme">◐</button>
-    </div>
+    <span class="live"><span class="live-dot"></span><span id="stamp">Loading</span></span>
   </div>
 </header>
 
-<main class="wrap" id="top">
+<main id="top">
 
-  <!-- ============ HERO ============ -->
   <section class="hero">
-    <div class="hero-copy">
-      <p class="kicker"><span class="dot"></span>Weekly brief · Japanese real estate</p>
-      <h1>The cycle has turned.<br><em>The data says how much&nbsp;—&nbsp;and where.</em></h1>
-      <p class="standfirst">Rates, prices, the yen, inbound demand, and what the listed market
-      thinks — every figure on this page is pulled live from source. Built for a sixty-second read.</p>
-    </div>
-    <div class="card hero-fig" id="heroFig">
-      <div class="skeleton" style="height:150px"></div>
-    </div>
-  </section>
-
-  <!-- ============ KPI ROW ============ -->
-  <section class="kpis" id="kpis" aria-label="Key indicators">
-    <div class="card tile"><div class="skeleton" style="height:84px"></div></div>
-    <div class="card tile"><div class="skeleton" style="height:84px"></div></div>
-    <div class="card tile"><div class="skeleton" style="height:84px"></div></div>
-    <div class="card tile"><div class="skeleton" style="height:84px"></div></div>
-    <div class="card tile"><div class="skeleton" style="height:84px"></div></div>
-  </section>
-
-  <!-- ============ SIGNALS ============ -->
-  <section class="signals" id="signalRow" aria-label="This week's signals"></section>
-
-  <!-- ============ 01 MACRO ============ -->
-  <section class="story" id="macro" data-kanji="一">
-    <div class="sec-head">
-      <p class="kicker"><span class="dot"></span>01 · The macro turn</p>
-      <h2>Money has a price again.</h2>
-      <p class="sec-sub" id="macroSub"></p>
-    </div>
-    <div class="card chart-card">
-      <div class="chart" id="chartRates" style="height:380px"><div class="skeleton fill"></div></div>
-      <p class="how">How to read it: after eight years pinned at or below zero (shaded), both Japanese
-      rates are climbing. For real estate, this is the first time since the 1990s that cap rates have
-      had real competition from bonds.</p>
-      <details class="data-view" id="tableRates"><summary>View the data</summary></details>
-    </div>
-  </section>
-
-  <!-- ============ 02 PRICES ============ -->
-  <section class="story" id="prices" data-kanji="二">
-    <div class="sec-head">
-      <p class="kicker"><span class="dot"></span>02 · Prices</p>
-      <h2>Three decades of falling home prices have reversed.</h2>
-      <p class="sec-sub" id="pricesSub"></p>
-    </div>
-    <div class="card chart-card">
-      <div class="chart" id="chartPrices" style="height:380px"><div class="skeleton fill"></div></div>
-      <p class="how">How to read it: the climb since 2013 is the first sustained recovery since the bubble
-      burst — but the gap between the nominal and inflation-adjusted lines shows part of the recent
-      run is inflation, not just real appreciation. This is a recovery, not (yet) a mania.</p>
-      <details class="data-view" id="tablePrices"><summary>View the data</summary></details>
-    </div>
-  </section>
-
-  <!-- ============ 03 YEN ============ -->
-  <section class="story" id="yen" data-kanji="三">
-    <div class="sec-head">
-      <p class="kicker"><span class="dot"></span>03 · The currency</p>
-      <h2>In dollars, Japan is still on sale.</h2>
-      <p class="sec-sub" id="yenSub"></p>
-    </div>
-    <div class="card chart-card">
-      <div class="chart" id="chartYen" style="height:360px"><div class="skeleton fill"></div></div>
-      <p class="how">How to read it: the same national housing index, priced in two currencies. The gap
-      between the lines is the yen — for a dollar-based buyer, the entire post-2019 rally has been
-      absorbed by the currency, and then some.</p>
-      <details class="data-view" id="tableYen"><summary>View the data</summary></details>
-    </div>
-  </section>
-
-  <!-- ============ 04 INBOUND ============ -->
-  <section class="story" id="inbound" data-kanji="四">
-    <div class="sec-head">
-      <p class="kicker"><span class="dot"></span>04 · The inbound engine</p>
-      <h2>Foreign demand is back — and it moved.</h2>
-      <p class="sec-sub" id="inboundSub"></p>
-    </div>
-
-    <div class="card chart-card">
-      <div class="chart" id="chartMap" style="height:560px"><div class="skeleton fill"></div></div>
-      <div class="map-legend" id="mapLegend"></div>
-      <p class="how">How to read it: blue prefectures host more foreign hotel nights than before the
-      pandemic; red ones haven't recovered. The story is the spread — recovery is not a Tokyo-only
-      phenomenon, and several regional markets have doubled.</p>
-    </div>
-
-    <div class="split">
-      <div class="card chart-card grow">
-        <h3 class="card-title">The destination screen <span class="card-note">regional prefectures, sized by 2025 foreign nights</span></h3>
-        <div class="chart" id="chartBubble" style="height:460px"><div class="skeleton fill"></div></div>
-        <p class="how">How to read it: up and to the right is where growing demand meets the long-haul
-        (US / European / Australian) guests who anchor luxury rates. Bubble size is total 2025 foreign
-        nights; highlighted markets pass the resort screen — regional, with at least 0.5M foreign nights.</p>
-      </div>
-      <aside class="rank-cards" id="rankCards"></aside>
-    </div>
-
-    <div class="card chart-card">
-      <h3 class="card-title">Full ranking <span class="card-note">screened prefectures, scored on demand growth, ski-season resort occupancy and long-haul share (equal weight)</span></h3>
-      <div class="table-scroll" id="rankTable"></div>
-    </div>
-  </section>
-
-  <!-- ============ 05 MARKETS ============ -->
-  <section class="story" id="markets" data-kanji="五">
-    <div class="sec-head">
-      <p class="kicker"><span class="dot"></span>05 · Market pulse</p>
-      <h2>The listed market disagrees.</h2>
-      <p class="sec-sub" id="marketsSub"></p>
-    </div>
-    <div class="card chart-card">
-      <div class="chart" id="chartMarket" style="height:380px"><div class="skeleton fill"></div></div>
-      <p class="how">How to read it: both lines start at 100 one year ago. Listed REITs are where rate
-      fears show up first — either they're the early warning for physical values, or the discount is
-      the entry point. Watch this gap weekly.</p>
-      <details class="data-view" id="tableMarket"><summary>View the data</summary></details>
-    </div>
-  </section>
-
-  <!-- ============ FOOTER ============ -->
-  <footer class="foot">
-    <div class="foot-grid">
+    <div class="wrap hero-in">
       <div>
-        <p class="kicker"><span class="dot"></span>Sources — all fetched live on load</p>
-        <ul class="src">
-          <li>Residential property prices: BIS via <a href="https://fred.stlouisfed.org/series/QJPN628BIS" target="_blank" rel="noopener">FRED QJPN628BIS</a> (nominal), <a href="https://fred.stlouisfed.org/series/QJPR628BIS" target="_blank" rel="noopener">QJPR628BIS</a> (real), quarterly</li>
-          <li>10-year JGB &amp; overnight call rate: OECD via <a href="https://fred.stlouisfed.org/series/IRLTLT01JPM156N" target="_blank" rel="noopener">FRED</a>, monthly</li>
-          <li>¥/$: Fed H.10 via <a href="https://fred.stlouisfed.org/series/DEXJPUS" target="_blank" rel="noopener">FRED DEXJPUS</a>, daily · Nikkei 225 via <a href="https://fred.stlouisfed.org/series/NIKKEI225" target="_blank" rel="noopener">FRED</a></li>
-          <li>J-REIT market: NEXT FUNDS TSE REIT Index ETF (1343.T) via Yahoo Finance, daily</li>
-          <li>Foreign guest nights by prefecture: <a href="https://www.mlit.go.jp/kankocho/tokei_hakusyo/shukuhakutokei.html" target="_blank" rel="noopener">Japan Tourism Agency, Overnight Travel Statistics Survey</a> (宿泊旅行統計調査), annual confirmed values, 2019 &amp; 2025</li>
-          <li>Map outlines: MLIT National Land Numerical Information via <a href="https://github.com/dataofjapan/land" target="_blank" rel="noopener">dataofjapan/land</a>, simplified</li>
-        </ul>
+        <p class="hero-date" id="heroDate"></p>
+        <h1>Japanese Real Estate<br><em>Weekly Pulse</em></h1>
       </div>
-      <div>
-        <p class="kicker"><span class="dot"></span>Method</p>
-        <p class="foot-note">Macro series are cached for six hours, market prices for thirty minutes;
-        everything else recomputes in your browser on each visit. The destination screen ranks regional
-        prefectures (metro areas excluded) with at least 500,000 foreign guest nights on three
-        equally-weighted measures: growth in foreign nights since 2019, December–March resort-hotel
-        occupancy, and the share of guests from long-haul markets.</p>
-        <p class="foot-note dim">A screening and monitoring tool — not investment advice.
-        Property indices are national; individual markets vary widely.</p>
-      </div>
+      <div class="hero-sun" aria-hidden="true"></div>
     </div>
-  </footer>
+  </section>
 
+  <div class="wrap">
+
+    <section class="kpis" id="kpis" aria-label="Key indicators">
+      <div class="tile sk"></div><div class="tile sk"></div><div class="tile sk"></div><div class="tile sk"></div>
+      <div class="tile sk"></div><div class="tile sk"></div><div class="tile sk"></div><div class="tile sk"></div>
+    </section>
+
+    <!-- 01 RATES -->
+    <section class="sec" id="rates">
+      <h2 class="sec-title"><span class="sec-no">1</span>Rates &amp; the yen</h2>
+      <div class="grid2">
+        <article class="card viz" data-chart="rates" data-h="320"></article>
+        <article class="card viz" data-chart="yen" data-h="320"></article>
+      </div>
+    </section>
+
+    <!-- 02 PRICES -->
+    <section class="sec" id="prices">
+      <h2 class="sec-title"><span class="sec-no">2</span>Prices</h2>
+      <div class="grid2">
+        <article class="card viz" data-chart="residential" data-h="320"></article>
+        <article class="card viz" data-chart="commercial" data-h="320"></article>
+      </div>
+      <article class="card viz" data-chart="longrun" data-h="280"></article>
+    </section>
+
+    <!-- 03 OFFICES -->
+    <section class="sec" id="offices">
+      <h2 class="sec-title"><span class="sec-no">3</span>Offices</h2>
+      <div class="grid2">
+        <article class="card viz" data-chart="rentclock" data-h="400"></article>
+        <article class="card viz" data-chart="cities" data-h="400"></article>
+      </div>
+      <article class="card viz" data-chart="wards" data-h="230"></article>
+    </section>
+
+    <!-- 04 INBOUND -->
+    <section class="sec" id="inbound">
+      <h2 class="sec-title"><span class="sec-no">4</span>Inbound demand</h2>
+
+      <article class="card viz map-card" data-chart="map" data-h="600"></article>
+
+      <div class="grid-2-1">
+        <article class="card viz" data-chart="screen" data-h="440"></article>
+        <aside class="rank-cards" id="rankCards"></aside>
+      </div>
+
+      <div class="grid2">
+        <article class="card viz" data-chart="arrivals" data-h="320"></article>
+        <article class="card viz" data-chart="markets" data-h="320"></article>
+      </div>
+    </section>
+
+    <!-- 05 REITS -->
+    <section class="sec" id="reits">
+      <h2 class="sec-title"><span class="sec-no">5</span>Listed REITs</h2>
+      <div class="grid2">
+        <article class="card viz" data-chart="market" data-h="340"></article>
+        <article class="card viz" data-chart="jreit" data-h="340"></article>
+      </div>
+    </section>
+
+    <footer class="foot">
+      <p class="foot-h">Sources</p>
+      <ul class="src" id="sources">
+        <li><a href="https://fred.stlouisfed.org/series/QJPN628BIS" target="_blank" rel="noopener">BIS property prices</a> · <a href="https://fred.stlouisfed.org/series/IRLTLT01JPM156N" target="_blank" rel="noopener">OECD rates</a> · <a href="https://fred.stlouisfed.org/series/DEXJPUS" target="_blank" rel="noopener">Fed ¥/$</a> · <a href="https://fred.stlouisfed.org/series/NIKKEI225" target="_blank" rel="noopener">Nikkei 225</a> — via FRED</li>
+        <li><a href="https://www.mlit.go.jp/totikensangyo/totikensangyo_tk5_000085.html" target="_blank" rel="noopener">MLIT Real Estate Price Index</a></li>
+        <li><a href="https://www.e-miki.com/rent/tokyo.html" target="_blank" rel="noopener">Miki Shoji office market data</a></li>
+        <li><a href="https://www.mlit.go.jp/kankocho/tokei_hakusyo/shukuhakutokei.html" target="_blank" rel="noopener">Japan Tourism Agency hotel statistics</a> (monthly &amp; annual)</li>
+        <li><a href="https://www.jnto.go.jp/statistics/data/visitors-statistics/" target="_blank" rel="noopener">JNTO visitor arrivals</a></li>
+        <li>Tokyo Stock Exchange prices via Yahoo Finance · map outlines: MLIT via <a href="https://github.com/dataofjapan/land" target="_blank" rel="noopener">dataofjapan/land</a></li>
+      </ul>
+      <p class="foot-note">Fetched live on each visit (cached 1–24h by source). A monitoring tool, not investment advice.</p>
+    </footer>
+  </div>
 </main>
 
 <script src="https://cdn.jsdelivr.net/npm/echarts@5.6.0/dist/echarts.min.js"></script>

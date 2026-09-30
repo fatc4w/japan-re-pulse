@@ -12,6 +12,8 @@ Sources:
 import io
 import json
 import os
+import re
+import time
 
 import numpy as np
 import openpyxl
@@ -93,13 +95,77 @@ def load_year(year: int) -> pd.DataFrame:
     print(f"downloading JTA workbook {year}…", flush=True)
     raw = requests.get(URLS[year], headers={"User-Agent": "Mozilla/5.0"}, timeout=180).content
     wb = openpyxl.load_workbook(io.BytesIO(raw), read_only=True, data_only=True)
-    return pd.DataFrame({
+    df = pd.DataFrame({
         "foreign_nights": sum_columns(wb, "第2表(年計)", ["外国人"]),
         "by_nationality": sum_columns(wb, "参考第1表(年計)", ["外国人"]),
         "long_haul": sum_columns(wb, "参考第1表(年計)", LONG_HAUL),
         "ski_occupancy": pd.concat(
             [sum_columns(wb, f"第8表({m}月)", ["リゾート"]) for m in SKI_MONTHS], axis=1).mean(axis=1),
     })
+    # monthly baselines per prefecture, for comparing the live monthly release
+    df["monthly_nights"] = pd.concat(
+        [sum_columns(wb, f"第2表({m}月)", ["外国人"]) for m in range(1, 13)], axis=1).values.tolist()
+    df["monthly_occupancy"] = pd.concat(
+        [column_values(wb, f"第8表({m}月)", 1) for m in range(1, 13)], axis=1).values.tolist()
+    return df
+
+
+def column_values(wb, sheet: str, col: int) -> pd.Series:
+    """One column by position, for each prefecture (used for the all-facility occupancy rate)."""
+    out = {}
+    for r in wb[sheet].iter_rows(values_only=True):
+        name = str(r[0] or "").strip("　 ").lstrip("0123456789")
+        if name in JP_TO_EN and len(r) > col:
+            out[JP_TO_EN[name]] = num(r[col])
+    return pd.Series(out)
+
+
+# ---------------------------------------------------------------------------
+# Miki Shoji Tokyo office history: each December page carries a 13-month table,
+# so one page per year reconstructs the full monthly series.
+# ---------------------------------------------------------------------------
+def miki_tables(html: str) -> dict:
+    strip = lambda s: re.sub(r"\s+", " ", re.sub(r"<[^>]+>", "", s)).strip()
+    tables = {}
+    for m in re.finditer(r"<h2[^>]*>(.*?)</h2>.*?<table>(.*?)</table>", html, re.S):
+        title, body = strip(m.group(1)), m.group(2)
+        ths = [strip(x) for x in re.findall(r"<th[^>]*>(.*?)</th>", body, re.S)]
+        months, year = [], None
+        for h in ths:
+            full, part = re.match(r"^(\d{4})\.(\d{2})$", h), re.match(r"^(\d{2})$", h)
+            if full:
+                year = int(full.group(1)); months.append(f"{full.group(1)}-{full.group(2)}")
+            elif part and year:
+                if months and int(part.group(1)) < int(months[-1][5:]):
+                    year += 1
+                months.append(f"{year}-{part.group(1)}")
+        rows = {}
+        for tr in re.findall(r"<tr>(.*?)</tr>", body, re.S):
+            tds = [strip(x) for x in re.findall(r"<td[^>]*>(.*?)</td>", tr, re.S)]
+            if len(tds) > 1:
+                rows[tds[0]] = [num(v) for v in tds[1:1 + len(months)]]
+        if months:
+            tables[title] = {"months": months, "rows": rows}
+    return tables
+
+
+def build_miki_history(first: int = 1991, last: int = LATEST) -> dict:
+    series = {}
+    for y in range(first, last + 1):
+        url = f"https://www.e-miki.com/rent/tokyo.html?yyyy={y}&mm=12"
+        try:
+            html = requests.get(url, headers={"User-Agent": "Mozilla/5.0"}, timeout=60).text
+            t = miki_tables(html)
+            vac, rent = t["東京の平均空室率"], t["東京の平均賃料"]
+            for i, mo in enumerate(vac["months"]):
+                v, rr = vac["rows"]["平均空室率"][i], rent["rows"]["平均賃料"][i]
+                if v is not None and rr is not None and not np.isnan(v) and not np.isnan(rr):
+                    series[mo] = (v, rr)
+        except Exception as e:  # a missing year just leaves a gap
+            print(f"  miki {y}: {e}", flush=True)
+        time.sleep(0.4)
+    months = sorted(series)
+    return {"months": months, "vacancy": [series[m][0] for m in months], "rent": [series[m][1] for m in months]}
 
 
 def simplify_ring(ring: list) -> list:
@@ -125,6 +191,12 @@ def build_boundaries() -> dict:
     return geo
 
 
+def clean_list(values, dp=0):
+    if values is None:
+        return None
+    return [None if v is None or pd.isna(v) else (round(float(v), dp) if dp else round(float(v))) for v in values]
+
+
 def main():
     out_dir = os.path.join(os.path.dirname(__file__), "..", "data")
     os.makedirs(out_dir, exist_ok=True)
@@ -132,7 +204,6 @@ def main():
     now, then = load_year(LATEST), load_year(BASE)
 
     df = pd.DataFrame(index=[p[1] for p in PREFECTURES])
-    df["name_ja"] = [p[0] for p in PREFECTURES]
     df["capital"] = [p[2] for p in PREFECTURES]
     df["lat"] = [p[3] for p in PREFECTURES]
     df["lon"] = [p[4] for p in PREFECTURES]
@@ -155,13 +226,16 @@ def main():
     prefs = []
     for name, r in df.iterrows():
         prefs.append({
-            "name": name, "name_ja": r["name_ja"], "capital": r["capital"],
+            "name": name, "capital": r["capital"],
             "lat": r["lat"], "lon": r["lon"], "region": r["region"],
             "nights_latest": None if pd.isna(r["nights_latest"]) else round(float(r["nights_latest"])),
             "nights_base": None if pd.isna(r["nights_base"]) else round(float(r["nights_base"])),
             "growth_pct": None if pd.isna(r["growth_pct"]) else round(float(r["growth_pct"]), 1),
             "ski_occupancy": None if pd.isna(r["ski_occupancy"]) else round(float(r["ski_occupancy"]), 1),
             "long_haul_share": None if pd.isna(r["long_haul_share"]) else round(float(r["long_haul_share"]), 1),
+            "monthly_nights_latest": clean_list(now["monthly_nights"].get(name)),
+            "monthly_nights_base": clean_list(then["monthly_nights"].get(name)),
+            "monthly_occupancy_latest": clean_list(now["monthly_occupancy"].get(name), 1),
             "screened": name in ranks,
             "rank": ranks.get(name),
             "score": round(float(scores[name]), 3) if name in scores else None,
@@ -171,7 +245,7 @@ def main():
         "meta": {
             "latest_year": LATEST, "base_year": BASE, "min_nights": MIN_NIGHTS,
             "metro_excluded": sorted(METRO),
-            "source": "Japan Tourism Agency, Overnight Travel Statistics Survey (宿泊旅行統計調査), annual confirmed values",
+            "source": "Japan Tourism Agency, Overnight Travel Statistics Survey, annual confirmed values",
             "source_url": "https://www.mlit.go.jp/kankocho/tokei_hakusyo/shukuhakutokei.html",
         },
         "totals": {
@@ -190,6 +264,12 @@ def main():
     with open(os.path.join(out_dir, "japan.geojson"), "w", encoding="utf-8") as f:
         json.dump(geo, f, ensure_ascii=False)
     print("japan.geojson written", flush=True)
+
+    print("downloading Miki Shoji Tokyo office history…", flush=True)
+    hist = build_miki_history()
+    with open(os.path.join(out_dir, "miki_tokyo_history.json"), "w", encoding="utf-8") as f:
+        json.dump(hist, f)
+    print(f"miki_tokyo_history.json written: {hist['months'][0]} → {hist['months'][-1]} ({len(hist['months'])} months)", flush=True)
 
 
 if __name__ == "__main__":
